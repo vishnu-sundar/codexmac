@@ -8,7 +8,7 @@ xcodebuild -project CodexMac.xcodeproj -scheme CodexMac -configuration Release \
 app="$PWD/build/DerivedData/Build/Products/Release/CodexMac.app"
 extension="$app/Contents/PlugIns/UsageWidget.appex"
 for executable in "$app/Contents/MacOS/CodexMac" "$extension/Contents/MacOS/UsageWidget"; do
-  lipo -verify_arch arm64 x86_64 "$executable"
+  lipo "$executable" -verify_arch arm64 x86_64
 done
 codesign --verify --deep --strict "$app"
 "$app/Contents/MacOS/CodexMac" --screenshots "$PWD/dist"
