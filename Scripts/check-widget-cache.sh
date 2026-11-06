@@ -20,10 +20,26 @@ default:
 }
 SWIFT
 swiftc Core/Cache.swift Core/Usage.swift "$temp/main.swift" -o "$temp/host"
-cp "$temp/host" "$temp/widget"
-codesign --force --sign - --identifier io.codexmac.monitor.widget.cacheprobe --entitlements Config/Widget.entitlements "$temp/widget"
+# App Sandbox initializes from the main bundle's Info.plist and code signature.
+probe="$temp/CacheProbe.app"
+mkdir -p "$probe/Contents/MacOS"
+cp "$temp/host" "$probe/Contents/MacOS/CacheProbe"
+cat > "$probe/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>io.codexmac.monitor.cacheprobe</string>
+<key>CFBundleExecutable</key><string>CacheProbe</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleName</key><string>CacheProbe</string>
+</dict></plist>
+PLIST
+codesign --force --sign - --entitlements Config/Widget.entitlements "$probe"
 marker="$(uuidgen)"
 "$temp/host" write "$marker"
-"$temp/widget" read "$marker"
+if ! "$probe/Contents/MacOS/CacheProbe" read "$marker"; then
+  /usr/bin/log show --last 1m --style compact --predicate 'process == "CacheProbe"' | tail -40
+  exit 1
+fi
 "$temp/host" clean "$marker"
 echo "Sandboxed widget cache round-trip passed."
