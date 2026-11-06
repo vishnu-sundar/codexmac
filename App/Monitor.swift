@@ -61,7 +61,7 @@ final class Monitor: ObservableObject {
                 reading.liveUntil = nil
             }
             do { try Cache.write(reading) }
-            catch { notice = "Widget storage is unavailable. Check the app group signing configuration." }
+            catch { notice = "Could not write the widget snapshot in Application Support." }
             WidgetCenter.shared.reloadTimelines(ofKind: "CodexMacUsage")
         }
     }

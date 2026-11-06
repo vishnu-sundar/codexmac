@@ -76,7 +76,7 @@ private final class Server {
         }
     }
     func send(_ packet: [String: Any]) throws {
-        var data = try JSONSerialization.data(withJSONObject: packet)
+        var data = try JSONSerialization.data(withJSONObject: packet, options: [.withoutEscapingSlashes])
         data.append(10)
         try input.fileHandleForWriting.write(contentsOf: data)
     }

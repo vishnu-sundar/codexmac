@@ -37,7 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentViewController = NSHostingController(rootView: Dashboard(model: model, settings: { [weak self] in self?.showSettings() }))
         observation = model.$reading.sink { [weak self] reading in self?.updateMenu(reading) }
         clock = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in if let self { updateMenu(model.reading) } }
+            Task { @MainActor in if let self { self.updateMenu(self.model.reading) } }
         }
         clock?.tolerance = 8
         NotificationCenter.default.addObserver(self, selector: #selector(screenChanged), name: NSApplication.didChangeScreenParametersNotification, object: nil)
@@ -65,7 +65,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func showSettings() {
         popover.performClose(nil)
         if preferences == nil {
-            let view = Preferences(model: model, panel: island, menuChanged: { [weak self] in if let self { updateMenu(model.reading) } })
+            let view = Preferences(model: model, panel: island, menuChanged: { [weak self] in if let self { self.updateMenu(self.model.reading) } })
             let window = NSWindow(contentViewController: NSHostingController(rootView: view))
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.title = "CodexMac Settings"

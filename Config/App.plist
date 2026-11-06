@@ -24,7 +24,5 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>UsageAppGroup</key>
-	<string>$(USAGE_APP_GROUP)</string>
 </dict>
 </plist>

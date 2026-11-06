@@ -23,7 +23,5 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
-	<key>UsageAppGroup</key>
-	<string>$(USAGE_APP_GROUP)</string>
 </dict>
 </plist>
