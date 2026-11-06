@@ -1,0 +1,49 @@
+name: Build CodexMac
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test core behavior
+        run: swift test
+      - name: Generate Xcode project
+        run: |
+          command -v xcodegen || brew install xcodegen
+          xcodegen generate
+      - name: Build, capture, and package universal app
+        run: bash Scripts/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CodexMac-macOS
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: github.event_name == 'push' && (github.ref_type == 'tag' || contains(github.event.head_commit.message, '[release]'))
+    permissions:
+      contents: write
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: CodexMac-macOS
+          path: dist
+      - name: Publish versioned downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(cat VERSION)"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then tag="$GITHUB_REF_NAME"; fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "CodexMac $tag" --notes-file Config/ReleaseNotes.md dist/*

@@ -1,0 +1,1 @@
+Download CodexMac.dmg and drag CodexMac.app into Applications. Requires macOS 14 or later and a Codex CLI signed in with ChatGPT. The universal build is ad-hoc signed and has no Apple notarization. See the README for Gatekeeper and widget signing details. The PNGs show the native views on a clean Mac without account data.

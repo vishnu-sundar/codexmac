@@ -1,0 +1,44 @@
+name: CodexMac
+options:
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_HARDENED_RUNTIME: YES
+    USAGE_APP_GROUP: group.io.codexmac.monitor
+targets:
+  CodexMac:
+    type: application
+    platform: macOS
+    sources: [App, Core]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.codexmac.monitor
+        INFOPLIST_FILE: Config/App.plist
+        CODE_SIGN_ENTITLEMENTS: Config/App.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - target: UsageWidget
+        embed: true
+  UsageWidget:
+    type: app-extension
+    platform: macOS
+    sources: [Widgets, Core]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.codexmac.monitor.widget
+        INFOPLIST_FILE: Config/Widget.plist
+        CODE_SIGN_ENTITLEMENTS: Config/Widget.entitlements
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+schemes:
+  CodexMac:
+    build:
+      targets:
+        CodexMac: all
