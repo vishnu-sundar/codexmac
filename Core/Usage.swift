@@ -38,6 +38,15 @@ struct ResetCredits: Codable {
     let availableCount: Int
     let credits: [ResetCredit]?
 
+    func nextExpiry(after now: Date) -> Date? {
+        guard availableCount > 0 else { return nil }
+        let timestamp = available.first { credit in
+            guard let expiry = credit.expiresAt else { return false }
+            return expiry > now.timeIntervalSince1970
+        }?.expiresAt
+        return timestamp.map(Date.init(timeIntervalSince1970:))
+    }
+
     var available: [ResetCredit] {
         (credits ?? []).filter { $0.status == "available" }.sorted {
             ($0.expiresAt ?? .infinity, $0.id) < ($1.expiresAt ?? .infinity, $1.id)
@@ -79,6 +88,22 @@ struct Reading: Codable {
     var liveUntil: Date?
     var issue: String?
     static let empty = Reading(issue: "Open CodexMac and sign in with the Codex CLI.")
+
+    func menuBarTitle(at now: Date, showExpiry: Bool) -> String {
+        let remaining = snapshot?.week.map { "\($0.remaining)%" } ?? "—"
+        var parts = ["Week " + remaining]
+        if showExpiry {
+            let credits = snapshot?.resetCredits
+            if let expiry = credits?.nextExpiry(after: now) {
+                let localTime = expiry.formatted(.dateTime.month(.abbreviated).day().hour().minute())
+                parts.append("Reset expires " + localTime)
+            } else {
+                parts.append(credits?.availableCount == 0 ? "No resets" : "Expiry —")
+            }
+        }
+        let cached = status(at: now) == "Cached" ? " ◌" : ""
+        return parts.joined(separator: " · ") + cached
+    }
 
     func status(at now: Date) -> String {
         guard snapshot?.hasData == true else { return "Unavailable" }

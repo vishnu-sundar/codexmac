@@ -38,7 +38,7 @@ struct Preferences: View {
                 Picker("Refresh every", selection: $interval) {
                     ForEach([5, 15, 30, 60], id: \.self) { Text("\($0) minutes").tag($0) }
                 }
-                Toggle("Reset countdown in menu bar", isOn: $menuTime)
+                Toggle("Show reset credit expiry in menu bar", isOn: $menuTime)
                 Toggle("Launch at login", isOn: $login).onChange(of: login) { _, enabled in
                     guard enabled != (SMAppService.mainApp.status == .enabled) else { return }
                     do {

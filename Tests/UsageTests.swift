@@ -87,3 +87,33 @@ extension UsageTests {
         XCTAssertNil(try JSONDecoder().decode(Snapshot.self, from: legacy).resetCredits)
     }
 }
+
+extension UsageTests {
+    func testMenuBarUsesWeeklyRemainingAndNextAvailableCreditExpiry() throws {
+        let snapshot = try decode("""
+        {"rateLimits":{"primary":{"windowDurationMins":300,"usedPercent":99,"resetsAt":1050},
+                       "secondary":{"windowDurationMins":10080,"usedPercent":30,"resetsAt":1500}},
+         "rateLimitResetCredits":{"availableCount":4,"credits":[
+             {"id":"used","status":"redeemed","expiresAt":1100},
+             {"id":"past","status":"available","expiresAt":950},
+             {"id":"later","status":"available","expiresAt":99000},
+             {"id":"first","status":"available","expiresAt":8000},
+             {"id":"nonexpiring","status":"available","expiresAt":null}]}}
+        """)
+        let expiry = Date(timeIntervalSince1970: 8000)
+        let reading = Reading(snapshot: snapshot, liveUntil: now.addingTimeInterval(300))
+        XCTAssertEqual(snapshot.resetCredits?.nextExpiry(after: now), expiry)
+        XCTAssertEqual(reading.menuBarTitle(at: now, showExpiry: true),
+                       "Week 70% · Reset expires " + expiry.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
+        XCTAssertEqual(reading.menuBarTitle(at: now, showExpiry: false), "Week 70%")
+        XCTAssertEqual(snapshot.resetCredits?.nextExpiry(after: expiry), Date(timeIntervalSince1970: 99000))
+    }
+
+    func testMenuBarDistinguishesUnknownExpiryAndZeroCredits() throws {
+        let countOnly = try decode(#"{"rateLimitResetCredits":{"availableCount":2}}"#)
+        XCTAssertEqual(Reading(snapshot: countOnly).menuBarTitle(at: now, showExpiry: true), "Week — · Expiry — ◌")
+        let none = try decode(#"{"rateLimitResetCredits":{"availableCount":0,"credits":[]}}"#)
+        XCTAssertEqual(Reading(snapshot: none).menuBarTitle(at: now, showExpiry: true), "Week — · No resets ◌")
+        XCTAssertEqual(Reading.empty.menuBarTitle(at: now, showExpiry: true), "Week — · Expiry —")
+    }
+}

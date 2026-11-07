@@ -8,7 +8,7 @@ A small floating usage monitor for macOS 14 Sonoma and later. A glass capsule sh
 
 1. Download **CodexMac.dmg** from a published release. Open it, drag **CodexMac.app** to **Applications**, eject the disk image, and open the installed app. If desired, compare the DMG's SHA-256 with the release's SHA256SUMS.txt using `shasum -a 256 CodexMac.dmg`.
 2. Install the official [Codex CLI](https://developers.openai.com/codex/cli/), run `codex login` in Terminal, and choose **Sign in with ChatGPT**. The app delegates authentication to that CLI. CodexMac has no password, API-key, or browser-cookie input.
-3. Click the menu bar percentages and choose **Refresh**. If CodexMac cannot find the CLI, run `command -v codex` in Terminal, then select that executable under **Settings → Codex CLI**. Finder-launched apps do not inherit all shell configuration. With a custom CODEX_HOME, ensure the app's launch environment points to the same Codex home.
+3. Click the weekly percentage in the menu bar and choose **Refresh**. If CodexMac cannot find the CLI, run `command -v codex` in Terminal, then select that executable under **Settings → Codex CLI**. Finder-launched apps do not inherit all shell configuration. With a custom CODEX_HOME, ensure the app's launch environment points to the same Codex home.
 4. For desktop widgets, open **Edit Widgets** on the desktop, search for **CodexMac** and add a small, medium, or large widget. Leave the menu bar app running to collect new readings.
 
 CI produces universal arm64/x86_64 binaries. The public build is ad-hoc signed. macOS may require **System Settings → Privacy & Security → Open Anyway** after the first launch attempt. Only approve a copy you trust. The release has no Developer ID notarization. Managed Macs may require an administrator-approved build.
@@ -17,7 +17,7 @@ CI produces universal arm64/x86_64 binaries. The public build is ad-hoc signed. 
 
 The waveform is the drag handle. Position is stored relative to each display's visible area; disconnecting a display brings the bar back onto an available screen. Select an anchor or restore the selected position in Settings. Auto-hide leaves a small handle you can hover to reveal. Choose Aurora, Ember, or Frost, adjust glass opacity, and toggle always-on-top.
 
-The menu bar opens the dashboard and settings. The compact countdown uses the five-hour reset when present, then the weekly reset. The expanded view shows both. A solid dot means live, a clock badge means cached, and a question mark means unavailable. Hover for the label. A hollow circle in the menu bar indicates cached data.
+The menu bar shows the weekly percentage remaining and the earliest reported future expiry of an available reset credit in local time. It shows **No resets** when the available count is zero, and **Expiry —** when there is no reported upcoming expiry. Click it to open the dashboard and settings. The floating bar countdown uses the five-hour reset when present, then the weekly reset. The expanded view shows both. A solid dot means live, a clock badge means cached, and a question mark means unavailable. Hover for the label. A hollow circle in the menu bar indicates cached data.
 
 ## Available reset credits
 

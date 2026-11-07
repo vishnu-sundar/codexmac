@@ -53,14 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func updateMenu(_ reading: Reading) {
         let now = Date()
         guard let button = item.button else { return }
-        let values = Period.allCases.map { period in
-            period.short + " " + (reading.snapshot?[period].map { "\($0.remaining)%" } ?? "—")
-        }.joined(separator: "  ")
-        let reset = reading.snapshot?.session?.reset ?? reading.snapshot?.week?.reset
-        let status = reading.status(at: now)
-        button.title = values + (model.defaults.bool(forKey: "menuTime") ? "  ◷ " + countdown(to: reset, now: now) : "") + (status == "Cached" ? " ◌" : "")
-        button.toolTip = "CodexMac · \(status) · Usage remaining"
-        button.setAccessibilityLabel(button.toolTip ?? "CodexMac")
+        let title = reading.menuBarTitle(at: now, showExpiry: model.defaults.bool(forKey: "menuTime"))
+        button.title = title
+        button.toolTip = "CodexMac · \(reading.status(at: now)) · Weekly usage remaining · Next reported reset credit expiry in local time"
+        button.setAccessibilityLabel(title + " · " + reading.status(at: now))
     }
     func showSettings() {
         popover.performClose(nil)
