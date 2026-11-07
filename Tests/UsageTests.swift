@@ -59,3 +59,31 @@ final class UsageTests: XCTestCase {
         XCTAssertEqual(countdown(to: now.addingTimeInterval(3700), now: now), "1h 2m")
     }
 }
+
+extension UsageTests {
+    func testAvailableCreditsKeepReportedCountAndSortAvailableRows() throws {
+        let value = try decode("""
+        {"rateLimitResetCredits":{"availableCount":3,"credits":[
+          {"id":"later","status":"available","expiresAt":2000},
+          {"id":"past","status":"redeemed","expiresAt":800},
+          {"id":"first","status":"available","title":"Full reset","description":"Restores both limits","expiresAt":1200}
+        ]}}
+        """)
+        let summary = try XCTUnwrap(value.resetCredits)
+        XCTAssertEqual(summary.availableCount, 3)
+        XCTAssertEqual(summary.available.map(\.id), ["first", "later"])
+        XCTAssertEqual(summary.available.first?.label, "Full reset")
+        XCTAssertEqual(summary.available.first?.expiresAt, 1200)
+        XCTAssertTrue(value.hasData)
+        let saved = try JSONDecoder().decode(Snapshot.self, from: JSONEncoder().encode(value))
+        XCTAssertEqual(saved.resetCredits?.available.first?.description, "Restores both limits")
+    }
+
+    func testCountOnlyZeroAndMissingAreDistinct() throws {
+        XCTAssertEqual(try decode(#"{"rateLimitResetCredits":{"availableCount":2,"credits":null}}"#).resetCredits?.availableCount, 2)
+        XCTAssertEqual(try decode(#"{"rateLimitResetCredits":{"availableCount":0,"credits":[]}}"#).resetCredits?.availableCount, 0)
+        XCTAssertNil(try decode(#"{"rateLimitResetCredits":null}"#).resetCredits)
+        let legacy = Data(#"{"owner":"A","date":0}"#.utf8)
+        XCTAssertNil(try JSONDecoder().decode(Snapshot.self, from: legacy).resetCredits)
+    }
+}

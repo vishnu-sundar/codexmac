@@ -19,6 +19,10 @@ The waveform is the drag handle. Position is stored relative to each display's v
 
 The menu bar opens the dashboard and settings. The compact countdown uses the five-hour reset when present, then the weekly reset. The expanded view shows both. A solid dot means live, a clock badge means cached, and a question mark means unavailable. Hover for the label. A hollow circle in the menu bar indicates cached data.
 
+## Available reset credits
+
+Click the floating bar and select **Resets**, or open the menu bar dashboard and look under **Usage limit resets**. The count comes from the CLI's `rateLimitResetCredits.availableCount`. CodexMac lists available credits in expiry order and shows their reported titles, descriptions and local expiration times. Some CLI versions or accounts supply only the count or omit reset credits entirely. The displayed count and details share the dashboard's Live or Cached status. Use the Codex web usage dashboard for redemption and account history.
+
 ## Data and privacy
 
 CodexMac launches a short-lived **codex app-server** process over standard input/output. It completes the initialization handshake, calls **account/read**, and requests **account/rateLimits/read**. It does not start a thread, submit a prompt, read session logs, or consume reset credits. This protocol and its JSON fields are described in [OpenAI's Codex app-server reference](https://developers.openai.com/codex/app-server#rate-limits-chatgpt). CLI versions and account plans can expose different buckets.

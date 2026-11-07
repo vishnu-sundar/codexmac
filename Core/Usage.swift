@@ -21,7 +21,32 @@ struct Bucket: Decodable {
     let secondary: Window?
 }
 
+struct ResetCredit: Codable, Identifiable {
+    let id: String
+    let title: String?
+    let description: String?
+    let status: String
+    let expiresAt: TimeInterval?
+
+    var label: String {
+        guard let title, !title.isEmpty else { return "Usage limit reset" }
+        return title
+    }
+}
+
+struct ResetCredits: Codable {
+    let availableCount: Int
+    let credits: [ResetCredit]?
+
+    var available: [ResetCredit] {
+        (credits ?? []).filter { $0.status == "available" }.sorted {
+            ($0.expiresAt ?? .infinity, $0.id) < ($1.expiresAt ?? .infinity, $1.id)
+        }
+    }
+}
+
 struct LimitResponse: Decodable {
+    let rateLimitResetCredits: ResetCredits?
     let rateLimits: Bucket?
     let rateLimitsByLimitId: [String: Bucket]?
 
@@ -34,7 +59,8 @@ struct LimitResponse: Decodable {
         func window(_ period: Period) -> Window? {
             windows.first { $0.windowDurationMins == period.rawValue && (0...100).contains($0.usedPercent) }
         }
-        return Snapshot(owner: owner, date: date, session: window(.session), week: window(.week))
+        return Snapshot(owner: owner, date: date, session: window(.session), week: window(.week),
+                        resetCredits: rateLimitResetCredits)
     }
 }
 
@@ -43,8 +69,9 @@ struct Snapshot: Codable {
     let date: Date
     let session: Window?
     let week: Window?
+    var resetCredits: ResetCredits? = nil
     subscript(_ period: Period) -> Window? { period == .session ? session : week }
-    var hasData: Bool { session != nil || week != nil }
+    var hasData: Bool { session != nil || week != nil || resetCredits != nil }
 }
 
 struct Reading: Codable {

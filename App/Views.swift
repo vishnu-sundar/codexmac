@@ -69,6 +69,52 @@ struct UsageDetails: View {
     }
 }
 
+struct ResetCreditDetails: View {
+    let summary: ResetCredits?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Usage limit resets").font(.headline)
+                Spacer()
+                if let summary {
+                    Text("Available · \(summary.availableCount)").font(.caption.weight(.semibold))
+                }
+            }
+            if let summary {
+                let rows = summary.available
+                if summary.availableCount == 0 {
+                    Text("No available reset credits.").font(.caption).foregroundStyle(.secondary)
+                } else if rows.isEmpty {
+                    Text("Codex supplied the count only.").font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(rows) { credit in
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(credit.label).font(.subheadline.weight(.semibold))
+                                    if let expiry = credit.expiresAt {
+                                        let date = Date(timeIntervalSince1970: expiry)
+                                        Text("Expires \(date.formatted(.dateTime.day().month().year().hour().minute().timeZone()))")
+                                    } else {
+                                        Text("No expiry")
+                                    }
+                                    if let detail = credit.description, !detail.isEmpty { Text(detail) }
+                                }.font(.caption).frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            if rows.count < summary.availableCount {
+                                Text("Details available for \(rows.count) of \(summary.availableCount).").font(.caption)
+                            }
+                        }
+                    }.frame(height: min(112, CGFloat(rows.count) * 60 + 18))
+                }
+            } else {
+                Text("Reset credits unavailable from Codex.").font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 struct UsageCard: View {
     let reading: Reading
     let now: Date
@@ -83,6 +129,8 @@ struct UsageCard: View {
             }
             Text("Usage remaining").font(.system(size: 25, weight: .medium, design: .rounded))
             UsageDetails(reading: reading, now: now, palette: palette)
+            Divider()
+            ResetCreditDetails(summary: reading.snapshot?.resetCredits)
             if let issue = reading.issue { Text(issue).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
             if let date = reading.snapshot?.date {
                 Text("Checked \(date.formatted(date: .abbreviated, time: .shortened))").font(.caption2).foregroundStyle(.secondary)
@@ -95,6 +143,7 @@ struct Island: View {
     @ObservedObject var monitor: Monitor
     @AppStorage("theme") var theme = "Aurora"
     @AppStorage("opacity") var opacity = 0.92
+    @State var showCredits = false
     var toggle: () -> Void
     var hover: (Bool) -> Void
     var settings: () -> Void
@@ -132,7 +181,15 @@ struct Island: View {
                     if monitor.expanded {
                         VStack(alignment: .leading, spacing: 12) {
                             Divider()
-                            UsageDetails(reading: monitor.reading, now: now, palette: palette)
+                            Picker("Details", selection: $showCredits) {
+                                Text("Usage").tag(false)
+                                Text(monitor.reading.snapshot?.resetCredits.map { "Resets (\($0.availableCount))" } ?? "Resets").tag(true)
+                            }.pickerStyle(.segmented).labelsHidden()
+                            if showCredits {
+                                ResetCreditDetails(summary: monitor.reading.snapshot?.resetCredits)
+                            } else {
+                                UsageDetails(reading: monitor.reading, now: now, palette: palette)
+                            }
                             HStack {
                                 Text(monitor.reading.status(at: now)).font(.caption.weight(.semibold))
                                 Spacer()

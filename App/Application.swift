@@ -127,6 +127,6 @@ private func captureScreenshots(to folder: URL) throws {
     let island = Island(monitor: model, toggle: {}, hover: { _ in }, settings: {})
     try capture(island, NSSize(width: 273, height: 42), "Floating-Bar.png")
     model.expanded = true
-    try capture(island, NSSize(width: 310, height: 242), "Expanded-Bar.png")
-    try capture(Dashboard(model: model, settings: {}), NSSize(width: 325, height: 330), "Dashboard.png")
+    try capture(island, NSSize(width: 310, height: 278), "Expanded-Bar.png")
+    try capture(Dashboard(model: model, settings: {}), NSSize(width: 325, height: 410), "Dashboard.png")
 }

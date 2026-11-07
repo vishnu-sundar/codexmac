@@ -48,7 +48,7 @@ final class Monitor: ObservableObject {
                     }
                 }
                 reading = Reading(snapshot: fresh, liveUntil: Date().addingTimeInterval(TimeInterval(interval * 60)),
-                                  issue: fresh.hasData ? nil : "Codex did not report a 5-hour or weekly window.")
+                                  issue: fresh.hasData ? nil : "Codex did not report usage windows or reset credits.")
             case .failure(let error):
                 if let failure = error as? SourceFailure {
                     switch failure {

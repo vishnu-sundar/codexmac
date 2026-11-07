@@ -80,7 +80,7 @@ final class IslandPanel: NSObject, NSWindowDelegate {
     func layout(animated: Bool = false) {
         guard let screen = NSScreen.screens.first(where: { $0.stableID == model.defaults.string(forKey: "screen") }) ?? NSScreen.main else { return }
         let visible = screen.visibleFrame
-        let size = model.tucked ? NSSize(width: 70, height: 14) : model.expanded ? NSSize(width: 310, height: 242) : NSSize(width: 273, height: 42)
+        let size = model.tucked ? NSSize(width: 70, height: 14) : model.expanded ? NSSize(width: 310, height: 278) : NSSize(width: 273, height: 42)
         let defaults = model.defaults
         let anchor = defaults.string(forKey: "anchor")
         let saved = defaults.object(forKey: "panelX") != nil

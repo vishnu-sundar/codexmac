@@ -30,7 +30,7 @@ struct CodexClient {
         guard let path = candidates.first(where: FileManager.default.isExecutableFile(atPath:)) else { throw SourceFailure.missing }
         let server = try Server(path: path)
         defer { server.close() }
-        let client = ["name": "codexmac", "title": "CodexMac", "version": "1.0"]
+        let client = ["name": "codexmac", "title": "CodexMac", "version": Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.1.0"]
         _ = try server.request(1, "initialize", ["clientInfo": client])
         try server.send(["method": "initialized"])
         let accountData = try server.request(2, "account/read", ["refreshToken": false])
